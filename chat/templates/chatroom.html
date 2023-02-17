@@ -8,18 +8,37 @@
 </head>
 <body>
     <div id = "user-hello"></div>
+    {{ room|json_script:"room_name"}}
+
+    
+        <textarea name="chat-text" id="chat-text" cols="30" rows="10"></textarea><br>
+        <input type="text" id="input"><br>
+        <input type="button" id="submit" value = "send">
+
     
 </body>
-        {{ room|json_script:"room_name"}}
-<script>
-    const roomName = JSON.parse(document.getElementById('room_name').textContent);
-    const chatSocket =  new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
-    ); 
+    <script>
+        document.querySelector('#submit').onClick = function(e) {
+            const messageInputDom =  document.querySelector("#input");
+            const message =  messageInputDom.value;
+            chatSocket.send(JSON.stringify({
 
-    chatSocket.onmessage = function(e){
-        const data = JSON.parse(e.data);
-        document.querySelector("#user-hello").innerHTML = (data.tester)
-    }
-</script>
+                'message':message, 
+            }));
+
+            messageInputDom.value = '';
+        };
+
+        const roomName = JSON.parse(document.getElementById('room_name').textContent);
+        const chatSocket =  new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        ); 
+
+        chatSocket.onmessage = function(e){
+            const data = JSON.parse(e.data);
+            console.log(data)
+            document.querySelector("#user-hello").innerHTML = (data.tester)
+            document.querySelector("#chat-text").value += (data.message + '\n')
+        }
+    </script>
 </html>
