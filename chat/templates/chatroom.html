@@ -7,17 +7,23 @@
     <title>Document</title>
 </head>
 <body>
-    <div id = "user-hello"></div>
+    <!-- <div id = "user-hello"></div>
     {{ room|json_script:"room_name"}}
 
     
         <textarea name="chat-text" id="chat-text" cols="30" rows="10"></textarea><br>
         <input type="text" id="input"><br>
-        <input type="button" id="submit" value = "send">
+        <input type="button" id="submit" value = "send"> -->
 
-    
+    <form id = "form">
+        <input type="text" name = "message">
+    </form>
+
+    <div id="messages"></div>
+
+
 </body>
-    <script>
+    <!-- <script>
         document.querySelector('#submit').onClick = function(e) {
             const messageInputDom =  document.querySelector("#input");
             const message =  messageInputDom.value;
@@ -40,5 +46,41 @@
             document.querySelector("#user-hello").innerHTML = (data.tester)
             document.querySelector("#chat-text").value += (data.message + '\n')
         }
-    </script>
+    </script> -->
+
+<script type="text/javascript">
+    let url = 'ws://' + window.location.host + '/ws/socket-server/'
+    const chatSocket = new WebSocket(url)
+
+    chatSocket.onmessage = function(e) {
+        let data = JSON.parse(e.data)
+        console.log('Data: ',data)
+
+        if (data.type === 'chat'){
+            let messages = document.getElementById('messages')
+
+            messages.insertAdjacentHTML('beforeend', `<div>
+                <p>${data.message}</p>
+            </div>`
+
+                )
+        }
+    }
+
+    let form = document.getElementById('form')
+    form.addEventListener('submit', (e)=>{
+        e.preventDefault()
+        let message = e.target.message.value 
+
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }))
+        form.reset()
+    })
+
+
+
+</script>
+
+
 </html>
